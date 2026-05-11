@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 6608124af4ffa12458a980f7e0d79496
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5976450650580996434
+    second: Techattack01_0
+  - first:
+      213: 8422845694728515102
+    second: Techattack01_1
+  - first:
+      213: -8961501216109860723
+    second: Techattack01_2
+  - first:
+      213: 1724899198053230294
+    second: Techattack01_3
+  - first:
+      213: 5846952790427412158
+    second: Techattack01_4
+  - first:
+      213: -8810434489957940403
+    second: Techattack01_5
+  - first:
+      213: 8357184878049583457
+    second: Techattack01_6
+  - first:
+      213: 4121727697058223610
+    second: Techattack01_7
+  - first:
+      213: -8420331019080177879
+    second: Techattack01_8
+  - first:
+      213: 4394898543600403939
+    second: Techattack01_9
+  - first:
+      213: -3257096024053476165
+    second: Techattack01_10
+  - first:
+      213: -1600816099564379932
+    second: Techattack01_11
+  - first:
+      213: -4957188602394459110
+    second: Techattack01_12
+  - first:
+      213: 7148502834994657692
+    second: Techattack01_13
+  - first:
+      213: -8812121959763408744
+    second: Techattack01_14
+  - first:
+      213: -6440794696256816132
+    second: Techattack01_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 50
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 0
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Techattack01_0
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 795
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eaea7724cc16f0da0800000000000000
+      internalID: -5976450650580996434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_1
+      rect:
+        serializedVersion: 2
+        x: 361
+        y: 795
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1ea8308885f3e470800000000000000
+      internalID: 8422845694728515102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_2
+      rect:
+        serializedVersion: 2
+        x: 602
+        y: 795
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d886a8fbf1a52a380800000000000000
+      internalID: -8961501216109860723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_3
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 794
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d6a1558ea210f710800000000000000
+      internalID: 1724899198053230294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_4
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 539
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb6a7eb959c842150800000000000000
+      internalID: 5846952790427412158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_5
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 544
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d430535d28c0bb580800000000000000
+      internalID: -8810434489957940403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_6
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 552
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 161696a4e5faaf370800000000000000
+      internalID: 8357184878049583457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_7
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 549
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af55b0ca081533930800000000000000
+      internalID: 4121727697058223610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_8
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 287
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 927e58c0d89f42b80800000000000000
+      internalID: -8420331019080177879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_9
+      rect:
+        serializedVersion: 2
+        x: 357
+        y: 278
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e50f23b0f0ddfc30800000000000000
+      internalID: 4394898543600403939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_10
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 284
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb494f64c687cc2d0800000000000000
+      internalID: -3257096024053476165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_11
+      rect:
+        serializedVersion: 2
+        x: 846
+        y: 284
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e02dba2d32c8c9e0800000000000000
+      internalID: -1600816099564379932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_12
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 39
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a14c9adfa37843bb0800000000000000
+      internalID: -4957188602394459110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_13
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 47
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c99babb3475943360800000000000000
+      internalID: 7148502834994657692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_14
+      rect:
+        serializedVersion: 2
+        x: 618
+        y: 39
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89802e624cd05b580800000000000000
+      internalID: -8812121959763408744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Techattack01_15
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 36
+        width: 101
+        height: 113
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfb746a3953bd96a0800000000000000
+      internalID: -6440794696256816132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b3c97ac953e4793408005509eaaaaaf4
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Techattack01_0: -5976450650580996434
+      Techattack01_1: 8422845694728515102
+      Techattack01_10: -3257096024053476165
+      Techattack01_11: -1600816099564379932
+      Techattack01_12: -4957188602394459110
+      Techattack01_13: 7148502834994657692
+      Techattack01_14: -8812121959763408744
+      Techattack01_15: -6440794696256816132
+      Techattack01_2: -8961501216109860723
+      Techattack01_3: 1724899198053230294
+      Techattack01_4: 5846952790427412158
+      Techattack01_5: -8810434489957940403
+      Techattack01_6: 8357184878049583457
+      Techattack01_7: 4121727697058223610
+      Techattack01_8: -8420331019080177879
+      Techattack01_9: 4394898543600403939
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

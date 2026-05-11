@@ -1,0 +1,116 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+
+public class PlayerController : MonoBehaviour
+{
+	[Header("Movement")]
+	[SerializeField] private float runSpeed = 6f;
+	[SerializeField] private bool autoRun = true;
+	
+	[Header("Jump")]
+	[SerializeField] private float jumpForce = 12f;
+	[SerializeField] private float coyoteTime = 0.15f;
+	[SerializeField] private float jumpBufferTime = 0.15f;
+	
+	private float coyoteCounter;
+	private float jumpBufferCounter;
+
+	//Para asignación acciones por código
+	private PlayerInput playerInput;
+	private InputAction moveAction;
+	private InputAction jumpAction;
+
+	private Rigidbody2D rb;
+	private bool isJumpPressed;
+	private bool isGrounded;
+
+	[Header("GUI")]
+	[SerializeField] private GameObject pausePanel; // Arrastras el panel aquí
+	
+	private void Awake()
+	{
+		rb = GetComponent<Rigidbody2D>();
+		
+		//Asignación acciones por código
+		playerInput = GetComponent<PlayerInput>();
+		moveAction = playerInput.actions.FindAction("Move");
+		jumpAction = playerInput.actions.FindAction("Jump");
+	}
+	
+	private void Start()
+	{
+	}
+	
+	private void OnEnable()
+	{
+		jumpAction.Enable();
+		jumpAction.performed += OnJump;
+		jumpAction.canceled += OnJump;
+		
+		if (!autoRun)
+			moveAction.Enable();
+	}
+
+	private void OnDisable()
+	{
+		jumpAction.performed -= OnJump;
+		jumpAction.canceled -= OnJump;
+		jumpAction.Disable();
+		moveAction.Disable();
+	}
+
+	private void Update()
+	{
+		// Jump Buffer
+		if (isJumpPressed)
+			jumpBufferCounter = jumpBufferTime;
+		else
+			jumpBufferCounter -= Time.deltaTime;
+		
+		// Coyote Time
+		if (isGrounded)
+			coyoteCounter = coyoteTime;
+		else
+			coyoteCounter -= Time.deltaTime;
+	}
+
+	private void FixedUpdate()
+	{
+		HandleJump();
+	}
+	
+	private void HandleJump()
+	{
+		if (jumpBufferCounter > 0 && coyoteCounter > 0) {
+			rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+			rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+			
+			isGrounded = false;
+			jumpBufferCounter = 0;
+			coyoteCounter = 0;
+		}
+		
+		// Salto corto al soltar el botón
+		if (!isJumpPressed && rb.linearVelocity.y > 0) {
+			rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+			isGrounded = false;
+		}
+	}
+
+	private void OnJump(InputAction.CallbackContext ctx)
+	{
+		if (ctx.performed)
+			isJumpPressed = true;
+		else if (ctx.canceled)
+			isJumpPressed = false;
+	}
+	
+	void OnCollisionEnter2D (Collision2D col)
+	{
+		if (col.gameObject.CompareTag("Ground")) {
+			isGrounded = true;
+		}
+	}
+	
+}
