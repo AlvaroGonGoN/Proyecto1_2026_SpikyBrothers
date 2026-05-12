@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class PlayerController : MonoBehaviour
+public class ControllerPlayer : MonoBehaviour
 {
 	[Header("Movement")]
 	[SerializeField] private float runSpeed = 6f;
@@ -77,7 +77,23 @@ public class PlayerController : MonoBehaviour
 
 	private void FixedUpdate()
 	{
+		HandleMovement();
 		HandleJump();
+	}
+
+	private void HandleMovement()
+	{
+		float targetSpeed = 0f;
+		if (autoRun)
+		{
+			targetSpeed = runSpeed;
+		}
+		else
+		{
+			float input = moveAction.ReadValue<float>();
+			targetSpeed = input*runSpeed;
+		}
+		rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
 	}
 	
 	private void HandleJump()
