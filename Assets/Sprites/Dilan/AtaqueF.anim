@@ -95,15 +95,8 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.45
-    functionName: 
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
   - time: 0.55
-    functionName: 
+    functionName: DeactivateAll
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

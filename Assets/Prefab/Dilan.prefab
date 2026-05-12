@@ -128,8 +128,8 @@ GameObject:
   - component: {fileID: 5338256412131157073}
   - component: {fileID: 8908623645936477334}
   - component: {fileID: 2891136883568538991}
-  - component: {fileID: 5760380496715440145}
   - component: {fileID: 3749639657352364153}
+  - component: {fileID: 6479319924894068910}
   m_Layer: 6
   m_Name: Dilan
   m_TagString: Player
@@ -174,7 +174,7 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
@@ -261,7 +261,7 @@ Rigidbody2D:
   m_Mass: 1.0120697
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -286,7 +286,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: ff09a01a098c75a4991bda9f5421a728, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 1
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -452,18 +452,15 @@ MonoBehaviour:
   runSpeed: 5
   depthSpeed: 3
   jumpForce: 6
-  jumpLaunchForce: 2
+  jumpLaunchForce: 1
+  gravity: 7
+  jumpCutFactor: 0.05
   coyoteTime: 0.2
-  jumpBufferTime: 9999
-  groundCheck: {fileID: 2189001855116964973}
-  groundCheckRadius: 0.15
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 1
+  jumpBufferTime: 0.02
   xMin: -8
-  xMax: 46
-  yMin: -2.5
-  yMax: -0.5
+  xMax: 99
+  floorMin: -3
+  floorMax: -1.8
 --- !u!114 &2891136883568538991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -486,19 +483,6 @@ MonoBehaviour:
   triggerHitStopOnAttack: 0
   comboWindow: 0.85
   jumpComboWindow: 0.18
---- !u!114 &5760380496715440145
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2315191842320149519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3214ebe18d0e71049b003e3e23ac2af3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
 --- !u!114 &3749639657352364153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -517,6 +501,21 @@ MonoBehaviour:
   hitBox_AirAttack1: {fileID: 7813258395492625288}
   hitBox_AirAttack2Strong: {fileID: 517948902412484958}
   hitBox_AirAttackStrong: {fileID: 5844803991949151655}
+--- !u!114 &6479319924894068910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2315191842320149519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 996e95f734e0fa74d9bf737d5996f4e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 100
+  invulnerabilityTime: 0.2
 --- !u!1 &2753931177672148319
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,7 +751,7 @@ GameObject:
   - component: {fileID: 8539452234586633260}
   - component: {fileID: 4853127379661237398}
   - component: {fileID: 3193082777954003245}
-  m_Layer: 9
+  m_Layer: 7
   m_Name: Hurtbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -768,7 +767,7 @@ Transform:
   m_GameObject: {fileID: 4177094654074033985}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.15, y: -0.06, z: 0.044988196}
+  m_LocalPosition: {x: 0.15, y: -0.06, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -808,8 +807,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.5, y: 1}
+  m_Offset: {x: 0.059116602, y: -0.04138148}
+  m_Size: {x: 0.7128196, y: 1.4138153}
   m_Direction: 0
 --- !u!114 &3193082777954003245
 MonoBehaviour:

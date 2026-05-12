@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 using UnityEngine;
+=======
+﻿using UnityEngine;
+>>>>>>> Stashed changes
 
 // ================================================================
 //  CAMERA FOLLOW — Cámara para Beat'em Up con bloqueo
@@ -17,6 +21,7 @@ public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
     [SerializeField] private Transform target;
+<<<<<<< Updated upstream
     [SerializeField] private string    autoFindByTag = "Player";
 
     [Header("Movimiento")]
@@ -35,6 +40,25 @@ public class CameraFollow : MonoBehaviour
 
     // ── Estado de bloqueo ─────────────────────────────────────
     private bool    isLocked;
+=======
+    [SerializeField] private string autoFindByTag = "Player";
+
+    [Header("Movimiento")]
+    [SerializeField] private Vector3 offset = new Vector3(0f, 1.5f, -10f);
+
+    [Header("Límites del nivel (eje X)")]
+    [SerializeField] private bool clampX = true;
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 1000f;
+
+    [Header("Eje Y")]
+    [Tooltip("Si está marcado, la Y queda fija (típico en beat'em ups).")]
+    [SerializeField] private bool lockY = true;
+    [SerializeField] private float fixedY = 0f;
+
+    // ── Estado de bloqueo ─────────────────────────────────────
+    private bool isLocked;
+>>>>>>> Stashed changes
     private Vector3 lockedPosition;
 
     public bool IsLocked => isLocked;
@@ -60,6 +84,7 @@ public class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
+<<<<<<< Updated upstream
         Vector3 desired = isLocked
             ? lockedPosition
             : ComputeFollowPosition();
@@ -82,6 +107,12 @@ public class CameraFollow : MonoBehaviour
         desired.z = offset.z;
         return desired;
     }
+=======
+
+    }
+
+
+>>>>>>> Stashed changes
 
     // ==========================================================
     //  API pública — usada por WaveManager

@@ -3,121 +3,94 @@ using UnityEngine.InputSystem;
 using System;
 
 /// <summary>
-/// Controla movimiento, salto y expone la API que necesita PlayerCombat.
-/// Requiere: Rigidbody2D, Animator, PlayerInput (Input System).
+/// Controlador Beat 'em Up con Rigidbody2D KINÉMÁTICO.
 ///
-/// Beat 'em Up:
-///   · A/D  → movimiento lateral (X), con flip de sprite automático.
-///   · W/S  → profundidad de calle (Y de pantalla), solo en suelo.
-///   · Espacio/botón Sur → salto con gravedad real (Rigidbody2D).
+/// MODELO DE 3 EJES (clave del género):
+///   · posX       → posición horizontal (A/D).
+///   · floorY     → profundidad de calle (W/S). Es la Y "del suelo".
+///   · jumpHeight → altura del salto sobre floorY. Gravedad simulada a mano.
 ///
-/// Ground check doble:
-///   · OverlapCircle en cada FixedUpdate (no depende de tags ni colisionadores perfectos).
-///   · OnCollisionEnter/Exit2D como refuerzo adicional.
+/// La Y visible del sprite es siempre:  floorY + jumpHeight
+/// Por eso saltar nunca pisa el movimiento de profundidad y al revés.
+///
+/// Requiere: Rigidbody2D (Body Type = Kinematic), Animator, PlayerInput.
+/// El Move del InputAction debe ser un 2D Vector Composite (W/A/S/D).
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
-    // ──────────────────────────────────────────────
-    //  Inspector — Movement
-    // ──────────────────────────────────────────────
     [Header("Movement")]
-    [SerializeField] private float runSpeed   = 6f;
+    [SerializeField] private float runSpeed = 6f;
     [SerializeField] private float depthSpeed = 3f;
 
-    [Header("Jump")]
-    [SerializeField] private float jumpForce       = 12f;
-    [SerializeField] private float jumpLaunchForce = 10f;
-    [SerializeField] private float coyoteTime      = 0.15f;
-    [SerializeField] private float jumpBufferTime  = 0.15f;
+    [Header("Jump (gravedad simulada)")]
+    [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private float jumpLaunchForce = 14f;
+    [SerializeField] private float gravity = 35f;
+    [SerializeField] private float jumpCutFactor = 0.5f;
+    [SerializeField] private float coyoteTime = 0.15f;
+    [SerializeField] private float jumpBufferTime = 0.15f;
 
-    // ──────────────────────────────────────────────
-    //  Inspector — Ground check
-    // ──────────────────────────────────────────────
-    [Header("Ground Check")]
-    [Tooltip("Punto de detección de suelo — crea un hijo vacío en los pies del personaje y arrástralo aquí")]
-    [SerializeField] private Transform groundCheck;
-    [Tooltip("Radio del OverlapCircle de detección")]
-    [SerializeField] private float groundCheckRadius = 0.15f;
-    [Tooltip("Layer(s) que se consideran suelo. Si se deja en Nothing detecta todos.")]
-    [SerializeField] private LayerMask groundLayer;
-
-    // ──────────────────────────────────────────────
-    //  Inspector — Scene Bounds
-    // ──────────────────────────────────────────────
     [Header("Scene Bounds")]
     [SerializeField] private float xMin = -8f;
-    [SerializeField] private float xMax =  8f;
-    [SerializeField] private float yMin = -2.5f;
-    [SerializeField] private float yMax = -0.5f;
+    [SerializeField] private float xMax = 8f;
+    [SerializeField] private float floorMin = -2.5f;
+    [SerializeField] private float floorMax = -0.5f;
 
-    // ──────────────────────────────────────────────
-    //  Input Actions
-    // ──────────────────────────────────────────────
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction attackAction;
 
-    // ──────────────────────────────────────────────
-    //  Componentes
-    // ──────────────────────────────────────────────
     private Rigidbody2D rb;
-    private Animator    anim;
+    private Animator anim;
 
-    // ──────────────────────────────────────────────
-    //  Estado
-    // ──────────────────────────────────────────────
-    private bool  isJumpPressed;
-    private bool  jumpCutApplied;
-    private bool  isGrounded;
+    private float floorY;
+    private float jumpHeight;
+    private float jumpVelocity;
+    private bool isGrounded => jumpHeight <= 0.001f;
+
+    private bool isJumpPressed;
+    private bool jumpCutApplied;
     private float coyoteCounter;
     private float jumpBufferCounter;
-    private bool  movementLocked;
-    private float groundY;  // Y base de profundidad (plano de la calle)
+    private bool movementLocked;
 
-    // ──────────────────────────────────────────────
-    //  Eventos / API pública
-    // ──────────────────────────────────────────────
     public event Action OnAttackPressed;
 
-    public bool        IsGrounded => isGrounded;
-    public Rigidbody2D Rb         => rb;
-    public Animator    Anim       => anim;
-    public float       JumpLaunch => jumpLaunchForce;
+    public bool IsGrounded => isGrounded;
+    public Rigidbody2D Rb => rb;
+    public Animator Anim => anim;
+    public float JumpLaunch => jumpLaunchForce;
 
-    // ──────────────────────────────────────────────
-    //  Unity — Init
-    // ──────────────────────────────────────────────
     private void Awake()
     {
-        rb   = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 
-        playerInput  = GetComponent<PlayerInput>();
-        moveAction   = playerInput.actions.FindAction("Move");
-        jumpAction   = playerInput.actions.FindAction("Jump");
-        attackAction = playerInput.actions.FindAction("Attack");
-
-        // Evita que el personaje rote al chocar con paredes/suelo
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        playerInput = GetComponent<PlayerInput>();
+        moveAction = playerInput.actions.FindAction("Move");
+        jumpAction = playerInput.actions.FindAction("Jump");
+        attackAction = playerInput.actions.FindAction("Attack");
     }
 
     private void Start()
     {
-        groundY = Mathf.Clamp(transform.position.y, yMin, yMax);
+        floorY = Mathf.Clamp(transform.position.y, floorMin, floorMax);
+        jumpHeight = 0f;
     }
 
     private void OnEnable()
     {
-        // BUG FIX: moveAction SIEMPRE se habilita.
-        // Antes solo se habilitaba si autoRun=false, rompiendo el movimiento
-        // de profundidad W/S y dejando al jugador sin ningún control.
         moveAction.Enable();
 
         jumpAction.Enable();
         jumpAction.performed += OnJump;
-        jumpAction.canceled  += OnJump;
+        jumpAction.canceled += OnJump;
 
         attackAction.Enable();
         attackAction.performed += OnAttack;
@@ -128,16 +101,13 @@ public class PlayerController : MonoBehaviour
         moveAction.Disable();
 
         jumpAction.performed -= OnJump;
-        jumpAction.canceled  -= OnJump;
+        jumpAction.canceled -= OnJump;
         jumpAction.Disable();
 
         attackAction.performed -= OnAttack;
         attackAction.Disable();
     }
 
-    // ──────────────────────────────────────────────
-    //  Unity — Loop
-    // ──────────────────────────────────────────────
     private void Update()
     {
         jumpBufferCounter = isJumpPressed
@@ -148,149 +118,78 @@ public class PlayerController : MonoBehaviour
             ? coyoteTime
             : coyoteCounter - Time.deltaTime;
 
-        float speedX = movementLocked ? 0f : Mathf.Abs(rb.linearVelocity.x);
-        anim.SetFloat("Speed", speedX);
+        Vector2 input = movementLocked ? Vector2.zero : moveAction.ReadValue<Vector2>();
+        anim.SetFloat("Speed", Mathf.Abs(input.x));
+        anim.SetBool("IsGrounded", isGrounded);
     }
 
     private void FixedUpdate()
     {
-        CheckGround();
-        HandleMovement();
-        HandleDepth();
-        HandleJump();
+        Vector2 input = movementLocked ? Vector2.zero : moveAction.ReadValue<Vector2>();
+        float dt = Time.fixedDeltaTime;
+
+        float posX = HandleHorizontal(input, dt);
+        HandleDepth(input, dt);
+        HandleJump(dt);
+
+        Vector2 finalPos = new Vector2(posX, floorY + jumpHeight);
+        rb.MovePosition(finalPos);
     }
 
-    private void LateUpdate()
+    private float HandleHorizontal(Vector2 input, float dt)
     {
-        // Red de seguridad: impide salir de los límites de escena
-        Vector2 pos = rb.position;
-        pos.x = Mathf.Clamp(pos.x, xMin, xMax);
-        if (isGrounded)
-            pos.y = Mathf.Clamp(pos.y, yMin, yMax);
-        rb.position = pos;
-    }
-
-    // ──────────────────────────────────────────────
-    //  Ground check — OverlapCircle
-    // ──────────────────────────────────────────────
-    /// <summary>
-    /// BUG FIX: la detección anterior solo usaba OnCollisionEnter2D,
-    /// que falla si el tag "Ground" no está puesto o si el personaje
-    /// está en el borde de un collider. OverlapCircle es fiable siempre.
-    ///
-    /// Si groundCheck no está asignado en el Inspector, se usa un punto
-    /// automático justo por debajo del Transform como fallback.
-    /// Si groundLayer no está asignado (valor 0), detecta cualquier layer
-    /// excepto el del propio personaje.
-    /// </summary>
-    private void CheckGround()
-    {
-        Vector2 origin = groundCheck != null
-            ? (Vector2)groundCheck.position
-            : (Vector2)transform.position + Vector2.down * 0.5f;
-
-        bool wasGrounded = isGrounded;
-
-        // Recoger todos los colliders en el radio
-        Collider2D[] hits = groundLayer == 0
-            ? Physics2D.OverlapCircleAll(origin, groundCheckRadius)
-            : Physics2D.OverlapCircleAll(origin, groundCheckRadius, groundLayer);
-
-        // Ignorar el propio personaje y sus hijos
-        isGrounded = false;
-        foreach (var c in hits)
-        {
-            if (c.transform.root != transform.root)
-            {
-                isGrounded = true;
-                break;
-            }
-        }
-
-        // Sincronizar Animator solo cuando cambia el estado
-        if (isGrounded != wasGrounded)
-            anim.SetBool("IsGrounded", isGrounded);
-
-        // Al aterrizar: anclar groundY
-        if (isGrounded && !wasGrounded)
-            groundY = Mathf.Clamp(transform.position.y, yMin, yMax);
-    }
-
-    // ──────────────────────────────────────────────
-    //  Movimiento lateral (X)
-    // ──────────────────────────────────────────────
-    private void HandleMovement()
-    {
-        if (movementLocked)
-        {
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            return;
-        }
-
-        // BUG FIX: antes "autoRun = true" hacía que el personaje se moviera
-        // siempre a la derecha sin que el jugador pudiera controlarlo.
-        // Ahora el jugador SIEMPRE controla el movimiento con A/D o el stick.
-        Vector2 input     = moveAction.ReadValue<Vector2>();
-        float targetSpeed = input.x * runSpeed;
+        float newX = rb.position.x + input.x * runSpeed * dt;
+        newX = Mathf.Clamp(newX, xMin, xMax);
 
         if (input.x != 0f)
             transform.localScale = new Vector3(Mathf.Sign(input.x), 1f, 1f);
 
-        rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
+        return newX;
     }
 
-    // ──────────────────────────────────────────────
-    //  Movimiento de profundidad (Y de pantalla)
-    // ──────────────────────────────────────────────
-    private void HandleDepth()
+    private void HandleDepth(Vector2 input, float dt)
     {
-        if (movementLocked || !isGrounded) return;
+        if (!isGrounded || input.y == 0f) return;
 
-        Vector2 input = moveAction.ReadValue<Vector2>();
-        if (input.y == 0f) return;
-
-        float newY = groundY + input.y * depthSpeed * Time.fixedDeltaTime;
-        groundY = Mathf.Clamp(newY, yMin, yMax);
-
-        // Transform directo, sin Rigidbody, para no interferir con el salto
-        Vector3 pos = transform.position;
-        pos.y = groundY;
-        transform.position = pos;
+        floorY += input.y * depthSpeed * dt;
+        floorY = Mathf.Clamp(floorY, floorMin, floorMax);
     }
 
-    // ──────────────────────────────────────────────
-    //  Salto
-    // ──────────────────────────────────────────────
-    private void HandleJump()
+    private void HandleJump(float dt)
     {
-        if (jumpBufferCounter > 0f && coyoteCounter > 0f)
+        if (jumpBufferCounter > 0f && coyoteCounter > 0f && isGrounded)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            anim.SetTrigger("Jump");
-
-            isGrounded        = false;
+            jumpVelocity = jumpForce;
             jumpBufferCounter = 0f;
-            coyoteCounter     = 0f;
-            jumpCutApplied    = false;
+            coyoteCounter = 0f;
+            jumpCutApplied = false;
+            anim.SetTrigger("Jump");
         }
 
-        // Jump cut: soltar el botón acorta el salto. Se aplica UNA sola vez.
-        if (!isJumpPressed && rb.linearVelocity.y > 0f && !jumpCutApplied)
+        if (!isJumpPressed && jumpVelocity > 0f && !jumpCutApplied)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-            jumpCutApplied    = true;
+            jumpVelocity *= jumpCutFactor;
+            jumpCutApplied = true;
+        }
+
+        if (!isGrounded || jumpVelocity > 0f)
+        {
+            jumpVelocity -= gravity * dt;
+            jumpHeight += jumpVelocity * dt;
+
+            if (jumpHeight <= 0f)
+            {
+                jumpHeight = 0f;
+                jumpVelocity = 0f;
+            }
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Callbacks de Input
-    // ──────────────────────────────────────────────
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
         {
-            isJumpPressed  = true;
+            isJumpPressed = true;
             jumpCutApplied = false;
         }
         else if (ctx.canceled)
@@ -304,55 +203,24 @@ public class PlayerController : MonoBehaviour
         OnAttackPressed?.Invoke();
     }
 
-    // ──────────────────────────────────────────────
-    //  Colisiones — refuerzo al OverlapCircle
-    // ──────────────────────────────────────────────
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        if (col.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-            anim.SetBool("IsGrounded", true);
-            groundY = Mathf.Clamp(transform.position.y, yMin, yMax);
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D col)
-    {
-        if (col.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-            anim.SetBool("IsGrounded", false);
-        }
-    }
-
-    // ──────────────────────────────────────────────
-    //  API pública para PlayerCombat
-    // ──────────────────────────────────────────────
     public void LaunchUpward()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpLaunchForce);
-        anim.SetBool("IsGrounded", false);
+        jumpVelocity = jumpLaunchForce;
     }
 
     public void SetMovementLocked(bool locked) => movementLocked = locked;
 
-    // ──────────────────────────────────────────────
-    //  Gizmos
-    // ──────────────────────────────────────────────
     private void OnDrawGizmosSelected()
     {
-        // Rectángulo de movimiento válido
         Gizmos.color = Color.cyan;
-        Vector3 center = new Vector3((xMin + xMax) / 2f, (yMin + yMax) / 2f, 0f);
-        Vector3 size   = new Vector3(xMax - xMin, yMax - yMin, 0f);
+        Vector3 center = new Vector3((xMin + xMax) / 2f, (floorMin + floorMax) / 2f, 0f);
+        Vector3 size = new Vector3(xMax - xMin, floorMax - floorMin, 0f);
         Gizmos.DrawWireCube(center, size);
 
-        // Punto de ground check
-        if (groundCheck != null)
+        if (Application.isPlaying)
         {
-            Gizmos.color = isGrounded ? Color.green : Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(new Vector3(xMin, floorY, 0f), new Vector3(xMax, floorY, 0f));
         }
     }
 }

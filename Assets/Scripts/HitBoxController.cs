@@ -1,5 +1,6 @@
 ﻿// HitBoxController.cs
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Controla qué hitbox está activa en cada momento.
@@ -93,6 +94,7 @@ public class HitBoxController : MonoBehaviour
 
         // Disparar hit stop en PlayerCombat (el hit stop real ocurre al impactar, no al lanzar)
         combat.TriggerHitStop(isStrong ? 1 : 0);
+        ScoreManager.Instance?.RegisterHit(data.damage, isStrong);
 
         // Aquí puedes añadir VFX/SFX usando data.hitPoint
         // Ejemplo: Instantiate(hitParticle, data.hitPoint, Quaternion.identity);

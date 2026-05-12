@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,17 +33,17 @@ public class PlayerCombat : MonoBehaviour
     //  Inspector – tiempos de ataque
     // ──────────────────────────────────────────────
     [Header("Duración de ataques (segundos)")]
-    [SerializeField] private float lightGroundDuration  = 0.30f;
+    [SerializeField] private float lightGroundDuration = 0.30f;
     [SerializeField] private float strongGroundDuration = 0.50f;
-    [SerializeField] private float lightAirDuration     = 0.35f;
-    [SerializeField] private float strongAirDuration    = 0.50f;
+    [SerializeField] private float lightAirDuration = 0.35f;
+    [SerializeField] private float strongAirDuration = 0.50f;
 
     // ──────────────────────────────────────────────
     //  Inspector – hit stop
     // ──────────────────────────────────────────────
     [Header("Hit Stop")]
     [Tooltip("Segundos que se congela el tiempo en un golpe ligero")]
-    [SerializeField] private float hitStopDurationLight  = 0.04f;
+    [SerializeField] private float hitStopDurationLight = 0.04f;
 
     [Tooltip("Segundos que se congela el tiempo en un golpe fuerte")]
     [SerializeField] private float hitStopDurationStrong = 0.12f;
@@ -60,16 +61,17 @@ public class PlayerCombat : MonoBehaviour
     // ──────────────────────────────────────────────
     [Header("Combo")]
     [Tooltip("Tiempo máximo entre golpes para mantener el combo")]
-    [SerializeField] private float comboWindow    = 0.85f;
+    [SerializeField] private float comboWindow = 0.85f;
 
     [Tooltip("Ventana de tiempo para detectar Jump simultáneo al 3er golpe")]
     [SerializeField] private float jumpComboWindow = 0.18f;
+    public event Action OnComboExpired;
 
     // ──────────────────────────────────────────────
     //  Estado interno
     // ──────────────────────────────────────────────
-    private int   groundCombo;
-    private int   airCombo;
+    private int groundCombo;
+    private int airCombo;
     private float comboTimer;          // usa unscaledDeltaTime → no se ve afectado por hit stop
 
     private bool isAttacking;
@@ -81,13 +83,13 @@ public class PlayerCombat : MonoBehaviour
 
     // Detección salto + 3er combo
     private InputAction jumpAction;
-    private float       jumpPressTimestamp = -999f;
+    private float jumpPressTimestamp = -999f;
 
     // ──────────────────────────────────────────────
     //  Referencias
     // ──────────────────────────────────────────────
     private PlayerController controller;
-    private Animator          anim;
+    private Animator anim;
 
     // ──────────────────────────────────────────────
     //  Unity
@@ -95,7 +97,7 @@ public class PlayerCombat : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<PlayerController>();
-        anim       = GetComponent<Animator>();
+        anim = GetComponent<Animator>();
 
         // El Animator del jugador corre en tiempo real para que su animación
         // continúe visible mientras el mundo está congelado.
@@ -217,7 +219,7 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator LaunchAndAirStrongAttack()
     {
-        isAttacking           = true;
+        isAttacking = true;
         currentAttackIsStrong = true;
         controller.SetMovementLocked(true);
 
@@ -304,8 +306,8 @@ public class PlayerCombat : MonoBehaviour
         // Evitar hit stops simultáneos (el más largo tiene prioridad)
         if (isHitStopped) yield break;
 
-        isHitStopped       = true;
-        Time.timeScale     = hitStopTimeScale;
+        isHitStopped = true;
+        Time.timeScale = hitStopTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale; // mantener física coherente
 
         yield return new WaitForSecondsRealtime(duration);
@@ -315,9 +317,9 @@ public class PlayerCombat : MonoBehaviour
 
     private void RestoreTimeScale()
     {
-        Time.timeScale      = 1f;
+        Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
-        isHitStopped        = false;
+        isHitStopped = false;
     }
 
     // ──────────────────────────────────────────────
@@ -328,10 +330,12 @@ public class PlayerCombat : MonoBehaviour
     private void ResetCombo()
     {
         groundCombo = 0;
-        airCombo    = 0;
-        comboTimer  = 0f;
+        airCombo = 0;
+        comboTimer = 0f;
+        OnComboExpired?.Invoke();
     }
 
     private bool SpacePressedInWindow()
         => (Time.unscaledTime - jumpPressTimestamp) <= jumpComboWindow;
 }
+

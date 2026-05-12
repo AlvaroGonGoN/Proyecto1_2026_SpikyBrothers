@@ -25,12 +25,18 @@ public class HealthComponent : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    void Start()
+    {
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     public void TakeDamage(float damage)
     {
         if (IsDead || _isInvulnerable) return;
 
         currentHealth -= damage;
         OnDamage?.Invoke(damage);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
         if (currentHealth <= 0)
         {
@@ -47,6 +53,7 @@ public class HealthComponent : MonoBehaviour
         if (IsDead) return;
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     void Die()
@@ -63,4 +70,3 @@ public class HealthComponent : MonoBehaviour
         _isInvulnerable = false;
     }
 }
-

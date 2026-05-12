@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{809C03E1-56A2-F1BB-D038-FB712E1CE3F3}</ProjectGuid>
+    <ProjectGuid>{C0403C50-CABE-2A9C-27CF-BAC26CAAEF61}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -64,15 +64,22 @@
     <Compile Include="Assets\Scripts\HurtBox.cs" />
     <Compile Include="Assets\Scripts\ParallaxLoop.cs" />
     <Compile Include="Assets\Scripts\PlayerCombat.cs" />
+    <Compile Include="Assets\Scripts\ScoreManager.cs" />
     <Compile Include="Assets\Scripts\HPBar.cs" />
+    <Compile Include="Assets\Scripts\WaveUI.cs" />
     <Compile Include="Assets\Scripts\HitboxDebugRenderer.cs" />
+    <Compile Include="Assets\Scripts\ScoreDisplay.cs" />
     <Compile Include="Assets\Scripts\HealthComponent.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\WaveManager.cs" />
     <Compile Include="Assets\Scripts\ParallaxEffect.cs" />
     <Compile Include="Assets\Scripts\EnemyController.cs" />
     <Compile Include="Assets\Scripts\HitBoxController.cs" />
-    <Compile Include="Assets\Scripts\Health.cs" />
+    <Compile Include="Assets\Scripts\EnemyWaveEntry.cs" />
+    <Compile Include="Assets\Scripts\WaveTrigger.cs" />
     <Compile Include="Assets\Scripts\Hitbox.cs" />
+    <Compile Include="Assets\Scripts\ControlPlayer1.cs" />
+    <Compile Include="Assets\Scripts\CameraFollow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -94,6 +101,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\TextMesh Pro\Fonts\linebeam.txt" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />

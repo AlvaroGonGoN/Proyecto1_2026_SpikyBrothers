@@ -1,24 +1,55 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Barra de vida UI conectada a un HealthComponent.
+/// Si 'target' queda vacío, intenta engancharse al GameObject con tag "Player".
+/// </summary>
+[RequireComponent(typeof(Slider))]
 public class HPBar : MonoBehaviour
 {
+    [SerializeField] private HealthComponent target;
+
     private Slider slider;
+
+    private void Awake()
+    {
+        slider = GetComponent<Slider>();
+    }
 
     private void Start()
     {
-       slider = GetComponent<Slider>(); 
+        if (target == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) target = player.GetComponent<HealthComponent>();
+        }
+
+        if (target == null)
+        {
+            Debug.LogWarning("[HPBar] No se encontró HealthComponent. Asígnalo en el Inspector o etiqueta al Player.");
+            return;
+        }
+
+        target.OnHealthChanged += HandleHealthChanged;
+        HandleHealthChanged(target.currentHealth, target.maxHealth);
     }
 
-    public void CambiarVidaMax(float vidaMaxima)
+    private void OnDestroy()
     {
-        slider.maxValue = vidaMaxima;
+        if (target != null)
+            target.OnHealthChanged -= HandleHealthChanged;
     }
 
-    public void CambiarVidaActual(float cantidadVida)
+    private void HandleHealthChanged(float current, float max)
     {
-        slider.value = cantidadVida;
+        slider.maxValue = max;
+        slider.value = current;
     }
+
+    // ── API pública retro-compatible ──────────────────────
+    public void CambiarVidaMax(float vidaMaxima) => slider.maxValue = vidaMaxima;
+    public void CambiarVidaActual(float cantidadVida) => slider.value = cantidadVida;
 
     public void InicializarBarra(float cantidadVida)
     {
@@ -26,4 +57,3 @@ public class HPBar : MonoBehaviour
         CambiarVidaActual(cantidadVida);
     }
 }
-

@@ -1,0 +1,363 @@
+using System.Collections;
+using UnityEngine;
+
+// ================================================================
+//  ENEMY CONTROLLER — Beat'em Up Core
+//  Basado en tu EnemyIA original. Conserva el mismo estilo
+//  (enum de estado, FindTarget, FixedUpdate para movimiento).
+//
+//  Añadidos:
+//    · Estados: Hurt, Dead  (+ Patrolling opcional)
+//    · HealthComponent integrado
+//    · Hitbox spawner (mismo prefab que el jugador)
+//    · ReceiveHit() para que la Hitbox del jugador lo llame
+//    · Rango de detección: el enemigo no persigue desde el inicio
+//
+//  BUG FIX (knockback + cooldown):
+//    · Antes: OnHurtBoxHit descartaba data.knockback y HurtRoutine hacía
+//      rb.linearVelocity = Vector2.zero, así que el knockback nunca se
+//      aplicaba. Además la HurtBox no se volvía invulnerable durante
+//      el aturdimiento → un mismo combo o nuevas hitboxes podían
+//      re-pegar al instante (sin cooldown entre golpes).
+//    · Ahora: HurtRoutine recibe HitData completo, aplica un AddForce
+//      con data.knockback y mantiene la HurtBox invulnerable durante
+//      todo el aturdimiento (i-frames = cooldown entre impactos).
+// ================================================================
+
+[RequireComponent(typeof(Rigidbody2D))]
+public class EnemyController : MonoBehaviour
+{
+    [Header("Movimiento")]
+    public float moveSpeed = 3f;
+    public float detectRange = 6f;    // distancia para empezar a perseguir
+    public float attackRange = 1.5f;
+
+    [Header("Combate")]
+    public float attackCooldown = 1.2f;
+    public float attackDamage = 10f;
+    public float knockbackForce = 4f;
+
+    [Header("Hitbox")]
+    public GameObject hitboxPrefab;      // mismo prefab que usa el jugador
+    public Transform hitboxSpawnPoint;  // hijo del enemigo, delante del sprite
+    public Vector2 hitboxSize = new(1.2f, 1f);
+    public float hitboxDelay = 0.15f;   // segundos hasta activar la hitbox
+    public float hitboxDuration = 0.12f;
+
+    [Header("Patrol (opcional)")]
+    public Transform[] patrolPoints;     // déjalo vacío para desactivar el patrullaje
+
+    [Header("Daño recibido")]
+    [Tooltip("Duración base del aturdimiento al recibir un golpe. " +
+             "Durante este tiempo la HurtBox es invulnerable (cooldown entre impactos).")]
+    public float hurtDuration = 0.35f;
+
+    [Tooltip("Multiplicador aplicado a data.knockback (HitData) al recibirlo. " +
+             "Usa <1 para enemigos pesados, >1 para enemigos ligeros.")]
+    public float knockbackReceiveMultiplier = 1f;
+
+    [Header("Referencias")]
+    public Transform target;
+    public Rigidbody2D rb;
+    public Animator animator;
+    public HitBox hb;
+
+    // ── Estado ────────────────────────────────────────────
+    private enum State { Idle, Patrolling, Chasing, Attacking, Hurt, Dead }
+    private State _state = State.Idle;
+
+    // ── Combate ───────────────────────────────────────────
+    private float _attackTimer;
+    private Coroutine _attackCoroutine;
+    private Coroutine _hurtCoroutine;
+
+    // ── Patrol ────────────────────────────────────────────
+    private int _patrolIndex = 0;
+
+    // ── Health ────────────────────────────────────────────
+    private HealthComponent _health;
+
+    // ── HurtBox propia (cache para gestionar i-frames) ───
+    private HurtBox _ownHurtBox;
+
+    // ==========================================================
+    //  INIT
+    // ==========================================================
+
+    void Awake()
+    {
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (animator == null) animator = GetComponent<Animator>();
+        if (hb == null) hb = GetComponent<HitBox>();
+
+        rb.gravityScale = 0;
+
+        _health = GetComponent<HealthComponent>();
+        if (_health == null) _health = gameObject.AddComponent<HealthComponent>();
+
+        _health.OnDeath += OnDeath;
+        _health.OnHealthChanged += (cur, max) => Debug.Log($"[Enemy] HP: {cur}/{max}");
+
+        // Conectar la HurtBox propia al sistema de daño.
+        // Sin esto, los golpes del jugador nunca aplicarían daño real.
+        _ownHurtBox = GetComponent<HurtBox>();
+        if (_ownHurtBox == null) _ownHurtBox = GetComponentInChildren<HurtBox>();
+
+        if (_ownHurtBox != null)
+            _ownHurtBox.OnHitReceived += OnHurtBoxHit;
+        else
+            Debug.LogWarning($"[Enemy {name}] No se encontró HurtBox. " +
+                             "Añade una HurtBox como hijo o en este mismo GameObject.");
+    }
+
+    void OnDestroy()
+    {
+        if (_ownHurtBox != null)
+            _ownHurtBox.OnHitReceived -= OnHurtBoxHit;
+    }
+
+    void Start()
+    {
+        FindTarget();
+        _state = patrolPoints != null && patrolPoints.Length > 0
+            ? State.Patrolling
+            : State.Idle;
+    }
+
+    // ==========================================================
+    //  UPDATE — MÁQUINA DE ESTADOS
+    // ==========================================================
+
+    void Update()
+    {
+        if (_state == State.Dead || _state == State.Hurt) return;
+        if (target == null) return;
+
+        float distance = Vector2.Distance(transform.position, target.position);
+
+        switch (_state)
+        {
+            case State.Idle:
+                if (distance <= detectRange) _state = State.Chasing;
+                break;
+
+            case State.Patrolling:
+                if (distance <= detectRange) _state = State.Chasing;
+                break;
+
+            case State.Chasing:
+                if (distance <= attackRange)
+                {
+                    rb.linearVelocity = Vector2.zero;
+                    animator.SetFloat("Speed", 0);
+                    _state = State.Attacking;
+                    _attackTimer = attackCooldown;
+                }
+                else if (distance > detectRange * 1.5f)
+                {
+                    _state = patrolPoints != null && patrolPoints.Length > 0
+                        ? State.Patrolling
+                        : State.Idle;
+                }
+                break;
+
+            case State.Attacking:
+                _attackTimer -= Time.deltaTime;
+
+                if (distance > attackRange)
+                {
+                    _state = State.Chasing;
+                    break;
+                }
+
+                if (_attackTimer <= 0f)
+                {
+                    _attackTimer = attackCooldown;
+                    if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
+                    _attackCoroutine = StartCoroutine(AttackRoutine());
+                }
+                break;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (_state == State.Chasing) MoveToTarget();
+        if (_state == State.Patrolling) Patrol();
+        // Durante Hurt no movemos: el knockback es controlado por la física.
+    }
+
+    // ==========================================================
+    //  MOVIMIENTO
+    // ==========================================================
+
+    void MoveToTarget()
+    {
+        Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+        rb.linearVelocity = direction * moveSpeed;
+
+        animator.SetFloat("Speed", rb.linearVelocity.magnitude);
+        FaceDirection(direction.x);
+    }
+
+    void Patrol()
+    {
+        if (patrolPoints == null || patrolPoints.Length == 0) return;
+
+        Transform wp = patrolPoints[_patrolIndex];
+        Vector2 dir = ((Vector2)wp.position - (Vector2)transform.position).normalized;
+
+        rb.linearVelocity = dir * moveSpeed * 0.5f;
+        animator.SetFloat("Speed", rb.linearVelocity.magnitude);
+        FaceDirection(dir.x);
+
+        if (Vector2.Distance(transform.position, wp.position) < 0.25f)
+            _patrolIndex = (_patrolIndex + 1) % patrolPoints.Length;
+    }
+
+    void FaceDirection(float xDir)
+    {
+        if (xDir == 0) return;
+        transform.localScale = new Vector3(Mathf.Sign(xDir), 1f, 1f);
+    }
+
+    // ==========================================================
+    //  COMBATE — ATAQUE
+    // ==========================================================
+
+    IEnumerator AttackRoutine()
+    {
+        animator.SetTrigger("Attack");
+
+        yield return new WaitForSeconds(hitboxDelay);
+        SpawnHitbox();
+    }
+
+    void SpawnHitbox()
+    {
+        if (hitboxPrefab == null || hitboxSpawnPoint == null) return;
+
+        GameObject go = Instantiate(
+            hitboxPrefab,
+            hitboxSpawnPoint.position,
+            Quaternion.identity);
+
+        // El HitBox se instancia desactivado (HitBox.Awake llama a Deactivate).
+        // Hay que activarlo a mano para que detecte colisiones.
+        HitBox spawnedHitBox = go.GetComponent<HitBox>();
+        if (spawnedHitBox != null)
+            spawnedHitBox.Activate();
+
+        Destroy(go, hitboxDuration);
+    }
+
+    // ==========================================================
+    //  RECIBIR DAÑO  (llamado desde la Hitbox del jugador)
+    // ==========================================================
+
+    // Callback del evento HurtBox.OnHitReceived.
+    // Ahora pasa el HitData COMPLETO para no perder knockback ni stun.
+    private void OnHurtBoxHit(HitData data)
+    {
+        ReceiveHit(data);
+    }
+
+    /// <summary>
+    /// Aplica el golpe completo: daño, knockback y aturdimiento con i-frames.
+    /// </summary>
+    public void ReceiveHit(HitData data)
+    {
+        if (_state == State.Dead) return;
+
+        _health.TakeDamage(data.damage);
+
+        if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
+        if (_hurtCoroutine != null) StopCoroutine(_hurtCoroutine);
+
+        _hurtCoroutine = StartCoroutine(HurtRoutine(data));
+    }
+
+    /// <summary>
+    /// Overload legacy por si alguien aún lo llama solo con daño.
+    /// No aplica knockback (no hay vector).
+    /// </summary>
+    public void ReceiveHit(float damage)
+    {
+        ReceiveHit(new HitData { damage = (int)damage, knockback = Vector2.zero });
+    }
+
+    IEnumerator HurtRoutine(HitData data)
+    {
+        _state = State.Hurt;
+        animator.SetFloat("Speed", 0);
+        animator.SetTrigger("Hurt");
+
+        // i-frames: la HurtBox se vuelve invulnerable mientras dura el aturdimiento.
+        // Esto es el "cooldown entre golpes" que faltaba: bloquea hitboxes nuevas
+        // hasta que el enemigo se recupera.
+        if (_ownHurtBox != null) _ownHurtBox.SetInvulnerable(true);
+
+        // Aplicar knockback: limpiar la velocidad previa y empujar con impulso.
+        rb.linearVelocity = Vector2.zero;
+        if (data.knockback.sqrMagnitude > 0.0001f)
+            rb.AddForce(data.knockback * knockbackReceiveMultiplier, ForceMode2D.Impulse);
+
+        // Si el ataque marca stun, usa su duración; si no, la del enemigo.
+        float stunTime = (data.causesStun && data.stunDuration > 0f)
+            ? data.stunDuration
+            : hurtDuration;
+
+        yield return new WaitForSeconds(stunTime);
+
+        // Cortar el residuo de knockback para que no siga deslizándose.
+        rb.linearVelocity = Vector2.zero;
+
+        if (_ownHurtBox != null) _ownHurtBox.SetInvulnerable(false);
+
+        if (_state != State.Dead)
+            _state = State.Chasing;
+    }
+
+    // ==========================================================
+    //  MUERTE
+    // ==========================================================
+
+    void OnDeath()
+    {
+        _state = State.Dead;
+        rb.linearVelocity = Vector2.zero;
+        animator.SetTrigger("Die");
+
+        if (_attackCoroutine != null) StopCoroutine(_attackCoroutine);
+        if (_hurtCoroutine != null) StopCoroutine(_hurtCoroutine);
+
+        // Al morir desactivamos definitivamente la hurtbox para que no encole más golpes
+        if (_ownHurtBox != null)
+        {
+            _ownHurtBox.SetInvulnerable(true);
+            _ownHurtBox.SetActive(false);
+        }
+
+        GetComponent<Collider2D>().enabled = false;
+        Destroy(gameObject, 2.5f);
+    }
+
+    // ==========================================================
+    //  UTILIDADES
+    // ==========================================================
+
+    void FindTarget()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) target = player.transform;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+}
